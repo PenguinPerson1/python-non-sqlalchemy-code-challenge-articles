@@ -12,9 +12,11 @@ class Article:
     
     @title.setter
     def title(self,value):
-        if type(value) == str and value != "":
-            if not hasattr(self,"title"):
+        if type(value) == str and value != "" and not hasattr(self,"title"):
+            if len(value) >= 5 and len(value) <= 50:
                 self._title = value
+            else: raise ValueError("title is between 5 and 50 characters inclusive")
+        else: raise TypeError("name is an immutable string")
 
     @property
     def author(self):
@@ -50,10 +52,8 @@ class Author:
         return Article(author=self,magazine=magazine,title=title)
 
     def topic_areas(self):
-        li = list({art.magazine.category for art in Article.all if art.author == self})
-        if len(li) > 0:
-            return li
-        return None
+        topics = list({art.magazine.category for art in Article.all if art.author == self})
+        return topics if len(topics) > 0 else None
 
     @property
     def name(self):
@@ -61,9 +61,9 @@ class Author:
     
     @name.setter
     def name(self,value):
-        if type(value) == str and value != "":
-            if not hasattr(self,"name"):
-                self._name = value
+        if type(value) == str and value != "" and not hasattr(self,"name"):
+            self._name = value
+        else: raise TypeError("name is an immutable string")
 
 class Magazine:
     def __init__(self, name, category):
@@ -94,6 +94,21 @@ class Magazine:
                 s1.add(art.author)
         return return_set if len(return_set) > 0 else None
 
+    @classmethod
+    def top_publisher(self):
+        publishers = {}
+        for article in Article.all:
+            if article.magazine in publishers:
+                publishers[article.magazine] += 1
+            else:
+                publishers[article.magazine] = 0
+        max_pub = [None,0]
+        for key, value in publishers.items():
+            if value >= max_pub[1]:
+                max_pub = [key,value]
+        return max_pub[0]
+
+
 
     @property
     def name(self):
@@ -103,6 +118,7 @@ class Magazine:
     def name(self,value):
         if type(value) == str and len(value) <= 16 and len(value) >= 2:
             self._name = value
+        else: raise TypeError("magazine name is of type str and can change")
 
     @property
     def category(self):
@@ -112,3 +128,4 @@ class Magazine:
     def category(self,value):
         if type(value) == str and value != "":
             self._category = value
+        else: raise TypeError("magazine category is of type str and can change")
